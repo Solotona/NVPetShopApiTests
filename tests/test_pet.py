@@ -1,8 +1,11 @@
+from types import NoneType
 
 import allure
 import requests
 import jsonschema
+import pytest
 from .schemas.pet_schema import PET_SCHEMA
+from requests.exceptions import JSONDecodeError
 
 BASE_URL = "http://5.181.109.28:9090/api/v3"
 
@@ -168,3 +171,32 @@ class TestPet:
 
         with allure.step("Проверка текстового содержимого ответа"):
             assert response.text == "Pet not found", "Текст ошибки не совпал с ожидаемым"
+
+
+# Урок 5. Параметризованные тесты
+    @allure.title("Получение списка питомцев по статусу")
+    @pytest.mark.parametrize( # В методе передаем строку с именами параметров (status, expected_status_code, is_json_response, expected_type) и список значений — каждый элемент списка — это кортеж (tuple)
+        "status, expected_status_code, is_json_response, expected_type", # Параметры is_json_response и expected_type нужны, чтобы обработать ошибки при негативных кейсах: при несуществующем или пустом значении статуса сервер возвращает json с объектом ошибки с code и message (dict), а не список (list). А при отсутствии статуса (None) сервер не возвращает JSON.
+        [
+            ("available", 200, True, list), # в ответе придет список (list)
+            ("pending", 200, True, list),
+            ("sold", 200, True, list),
+            ("vdvd", 400, True, dict), # недопустимый статус, в ответе придет JSON-объект ошибки с словарем (dict), а не список (list): {"code": 400,"message": "Input error: query parameter `status` value `vdvd` is not in the allowable values `[available, pending, sold]`"}
+            ("", 400, True, dict), # пустой статус, в ответе придет JSON-объект ошибки с словарем (dict), а не список (list): {"code": 400,"message": "Input error: query parameter `status` value `` is not in the allowable values `[available, pending, sold]`"}
+            (None, 400, False, None) # отсутствующий параметр, в ответе не-JSON (ожидается JSONDecodeError).
+        ]
+    )
+    def test_get_pets_by_status(self, status, expected_status_code, is_json_response, expected_type):
+        with allure.step(f"Отправка запроса на получение питомцев по статусу {status}"):
+            params = {"status": status} if status is not None else {}
+            response = requests.get(f"{BASE_URL}/pet/findByStatus", params=params)
+
+        with allure.step("Проверка статуса ответа и формата данных"):
+            assert response.status_code == expected_status_code
+
+            if is_json_response:
+                assert isinstance(response.json(), expected_type)
+            else:
+                # Когда JSON НЕ парсится, падаем с исключением JSONDecodeError
+                with pytest.raises(requests.exceptions.JSONDecodeError): # pytest.raises(...)-cпециальный инструмент в фреймворке pytest, который ожидает, что внутри блока with будет вызвано указанное исключение. requests.exceptions.JSONDecodeError-тип исключения. Возникает, когда метод response.json() пытается распарсить строку, которая не является валидным JSON (неправильные кавычки, отсутствуют скобки, неверная структура)
+                    response.json()

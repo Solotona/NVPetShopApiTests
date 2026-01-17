@@ -21,7 +21,7 @@ class TestStore:
             response_json = response.json()
 
         with allure.step("Проверка статуса ответа и валидация JSON-схеме"):
-            assert response.status_code == 200
+            assert response.status_code == 200, "Код ответа не совпал с ожидаемым"
             jsonschema.validate(response_json, ORDER_SCHEMA)
 
         with allure.step("Проверка параметров заказа в ответе"):
@@ -39,9 +39,11 @@ class TestStore:
         with allure.step("Отправка запроса на получение информации о заказе по ID"):
             response = requests.get(f"{BASE_URL}/store/order/{order_id}")
 
-        with allure.step("Проверка статуса ответа и данных заказа"):
-            assert response.status_code == 200
-            assert response.json()["id"] == order_id
+        with allure.step("Проверка статуса ответа"):
+            assert response.status_code == 200, "Код ответа не совпал с ожидаемым"
+
+        with allure.step("Ответ содержит данные с id заказа"):
+            assert response.json()["id"] == order_id, "id заказа не совпал с ожидаемым"
 
 
     @allure.title("Удаление заказа по ID")
@@ -53,7 +55,7 @@ class TestStore:
             response = requests.delete(f"{BASE_URL}/store/order/{order_id}")
 
         with allure.step("Проверка статуса ответа"):
-            assert response.status_code == 200
+            assert response.status_code == 200, "Код ответа не совпал с ожидаемым"
 
         with allure.step("Отправка запроса на получение информации об удаленном заказе по ID"):
             response = requests.get(f"{BASE_URL}/store/order/{order_id}")
@@ -75,7 +77,6 @@ class TestStore:
 
         with allure.step("Проверка текстового содержимого ответа"):
             assert response.text == "Order not found", "Текст ошибки не совпал с ожидаемым"
-            print()
 
 
     @allure.title("Получение инвентаря магазина")

@@ -84,12 +84,13 @@ class TestStore:
     def test_get_inventory(self):
         with allure.step(f"Отправка запроса на получение инвентаря"):
             response = requests.get(f"{BASE_URL}/store/inventory")
+            response_json = response.json()
 
         with allure.step("Проверка статуса ответа"):
             assert response.status_code == 200, "Код ответа не совпал с ожидаемым"
 
         with allure.step("Проверка на тип объекта в ответе"):
-            assert isinstance(response.json(), dict), "Тип объекта не совпал с ожидаемым"
+            assert isinstance(response_json, dict), "Тип объекта не совпал с ожидаемым"
 
         with allure.step("Проверка валидации JSON-схеме"):
-            jsonschema.validate(response.json(), INVENTORY_SCHEMA), "Значение не является целым числом integer($int32)"
+            jsonschema.validate(response_json, INVENTORY_SCHEMA)

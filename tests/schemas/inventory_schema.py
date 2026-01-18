@@ -1,8 +1,20 @@
 INVENTORY_SCHEMA = {
     "type": "object",
-    "additionalProperties": {
-        "type": "integer",
-        "minimum": -2147483647,   # int32 min
-        "maximum": 2147483647     # int32 max
+    "properties": {
+        "placed": {
+            "type": "integer",
+            "minimum": -2147483647,
+            "maximum": 2147483647
+        },
+        "approved": {
+            "type": "integer",
+            "minimum": -2147483647,
+            "maximum": 2147483647
+        },
+        "delivered": {
+            "type": "integer",
+            "minimum": -2147483647,
+            "maximum": 2147483647
+        }
     }
 }

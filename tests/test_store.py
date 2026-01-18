@@ -5,6 +5,7 @@ import pytest
 
 from .conftest import create_order
 from .schemas.order_schema import ORDER_SCHEMA
+from .schemas.inventory_schema import INVENTORY_SCHEMA
 
 BASE_URL = "http://5.181.109.28:9090/api/v3"
 
@@ -90,7 +91,5 @@ class TestStore:
         with allure.step("Проверка на тип объекта в ответе"):
             assert isinstance(response.json(), dict), "Тип объекта не совпал с ожидаемым"
 
-        with allure.step("Проверка, что все значения в словаре — целые числа >= 0"):
-            for key, value in (response.json().items()):
-                assert isinstance(value, int), f"Значение для '{key}' не является int: {type(value)}"
-                assert value >= 0, f"Значение для '{key}' отрицательное: {value}"
+        with allure.step("Проверка валидации JSON-схеме"):
+            jsonschema.validate(response.json(), INVENTORY_SCHEMA), "Значение не является целым числом integer($int32)"

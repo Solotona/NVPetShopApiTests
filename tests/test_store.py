@@ -89,8 +89,5 @@ class TestStore:
         with allure.step("Проверка статуса ответа"):
             assert response.status_code == 200, "Код ответа не совпал с ожидаемым"
 
-        with allure.step("Проверка на тип объекта в ответе"):
-            assert isinstance(response_json, dict), "Тип объекта не совпал с ожидаемым"
-
         with allure.step("Проверка валидации JSON-схеме"):
             jsonschema.validate(response_json, INVENTORY_SCHEMA)

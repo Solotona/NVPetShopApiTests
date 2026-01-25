@@ -3,17 +3,17 @@ INVENTORY_SCHEMA = {
     "properties": {
         "placed": {
             "type": "integer",
-            "minimum": -2147483647,
+            "minimum": 0,
             "maximum": 2147483647
         },
         "approved": {
             "type": "integer",
-            "minimum": -2147483647,
+            "minimum": 0,
             "maximum": 2147483647
         },
         "delivered": {
             "type": "integer",
-            "minimum": -2147483647,
+            "minimum": 0,
             "maximum": 2147483647
         }
     }
